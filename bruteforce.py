@@ -1,51 +1,51 @@
-import itertools
+def read_actions_from_file(filename):
+    actions = []
+    with open(filename, 'r') as file:
+        for line in file:
+            parts = line.strip().split(',')
+            name = parts[0]
+            cost = int(parts[1])
+            profit_percentage = float(parts[2].replace('%', '')) / 100.0
+            actions.append({"name": name, "cost": cost, "profit": profit_percentage})
+    return actions
 
-# List of actions with their costs and profits
-actions = [
-    {"name": "Action-1", "cost": 20, "profit": 0.05},
-    {"name": "Action-2", "cost": 30, "profit": 0.10},
-    {"name": "Action-3", "cost": 50, "profit": 0.15},
-    {"name": "Action-4", "cost": 70, "profit": 0.20},
-    {"name": "Action-5", "cost": 60, "profit": 0.17},
-    {"name": "Action-6", "cost": 80, "profit": 0.25},
-    {"name": "Action-7", "cost": 22, "profit": 0.07},
-    {"name": "Action-8", "cost": 26, "profit": 0.11},
-    {"name": "Action-9", "cost": 48, "profit": 0.13},
-    {"name": "Action-10", "cost": 34, "profit": 0.27},
-    {"name": "Action-11", "cost": 42, "profit": 0.17},
-    {"name": "Action-12", "cost": 110, "profit": 0.09},
-    {"name": "Action-13", "cost": 38, "profit": 0.23},
-    {"name": "Action-14", "cost": 14, "profit": 0.01},
-    {"name": "Action-15", "cost": 18, "profit": 0.03},
-    {"name": "Action-16", "cost": 8, "profit": 0.08},
-    {"name": "Action-17", "cost": 4, "profit": 0.12},
-    {"name": "Action-18", "cost": 10, "profit": 0.14},
-    {"name": "Action-19", "cost": 24, "profit": 0.21},
-    {"name": "Action-20", "cost": 114, "profit": 0.18},
-]
-
-# Maximum budget per client
-max_budget = 500
-
-# Function to calculate the total profit for a combination of actions
-def calculate_total_profit(combination):
+def calculate_total_profit(combination, actions):
     total_cost = sum(actions[i]["cost"] for i in combination)
-    total_profit = sum(actions[i]["profit"] for i in combination)
+    total_profit_percentage = sum(actions[i]["profit"] for i in combination)
+    total_profit = total_cost * total_profit_percentage
     return total_cost, total_profit
 
-best_profit = 0
-best_combination = []
+def find_best_combination(actions, max_budget):
+    best_combination = []
+    best_profit = 0.0
 
-# Iterate through all possible combinations of actions
-for r in range(1, len(actions) + 1):
-    for combination in itertools.combinations(range(len(actions)), r):
-        total_cost, total_profit = calculate_total_profit(combination)
+    num_actions = len(actions)
+
+    # Try all possible combinations using a bitmask
+    for bitmask in range(1, (1 << num_actions)):
+        current_combination = [i for i in range(num_actions) if (bitmask & (1 << i)) > 0]
+        total_cost, total_profit = calculate_total_profit(current_combination, actions)
+
         if total_cost <= max_budget and total_profit > best_profit:
             best_profit = total_profit
-            best_combination = combination
+            print(best_profit)
+            best_combination = current_combination[:]
+            print(best_combination)
 
-# Print the best combination and the corresponding profit
-print("Best combination of actions:")
-for i in best_combination:
-    print(actions[i]["name"])
-print("Total profit after 2 years: {:.2f} euros".format(best_profit * max_budget))
+    return best_combination, best_profit
+
+if __name__ == "__main__":
+    # Read actions from the file
+    actions = read_actions_from_file("actions.txt")
+
+    # Maximum budget per client
+    max_budget = 500
+
+    # Find the best combination
+    best_combination, best_profit = find_best_combination(actions, max_budget)
+
+    # Print the best combination and the corresponding profit
+    print("Best combination of actions:")
+    for i in best_combination:
+        print(actions[i]["name"])
+    print("Total profit after 2 years: {:.2f} euros".format(best_profit))
