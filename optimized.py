@@ -7,7 +7,7 @@ start_time = time.time()
 
 # Read actions from the file
 actions = read_actions_from_file_optimized("data/dataset1_Python+P7.csv")
-# actions = read_actions_from_file("actions.txt")
+#actions = read_actions_from_file("actions.txt")
 
 # Sort actions by cost-to-benefit ratio
 sorted_actions = sorted(actions, key=lambda x: x["cost"] / x["profit"] if x["profit"] != 0 else float('inf'), reverse=True)
